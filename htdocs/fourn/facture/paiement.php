@@ -317,6 +317,21 @@ llxHeader('',$langs->trans('ListPayment'));
 
 $form=new Form($db);
 
+print '<script>';
+print '$(document).ready(function(){';
+	print '$(".liste input[type=checkbox]").each(function(){';
+		print 'var valueck = $(this).attr("name");';
+		print 'var valinpt = $(\'#\' + valueck).val();';
+		print 'if(valinpt == "") {';
+			print 'console.log("bjr");';
+		print '}';
+		print 'else {';
+			print '$(this).attr(\'checked\',true);';
+		print '}';
+	print '})';
+print '})';
+print '</script>';
+
 if ($action == 'create' || $action == 'confirm_paiement' || $action == 'add_paiement')
 {
     $object = new FactureFournisseur($db);
@@ -436,6 +451,7 @@ if ($action == 'create' || $action == 'confirm_paiement' || $action == 'add_paie
 	                    print '<td align="right">'.$langs->trans('AmountTTC').'</td>';
 	                    print '<td align="right">'.$langs->trans('AlreadyPaid').'</td>';
 	                    print '<td align="right">'.$langs->trans('RemainderToPay').'</td>';
+	                    print '<td align="right">--></td>';
 						print '<td align="center">'.$langs->trans('PaymentAmount').'</td>';
 						if (!empty($conf->multicurrency->enabled)) print '<td align="center">'.$langs->trans('MulticurrencyPaymentAmount').'</td>';
 	                    print '</tr>';
@@ -504,12 +520,32 @@ if ($action == 'create' || $action == 'confirm_paiement' || $action == 'add_paie
 	                        print '<td align="right">'.price($objp->am).'</td>';
 							
 	                        print '<td align="right">'.price($objp->total_ttc - $objp->am).'</td>';
+
+	                        $namep = price($objp->total_ttc - $objp->am);
+							$namec = 'amount_'.$objp->facid;
+							print '<script>';
+							print 'function getValeur(me){';
+								print 'val_id = me.name;';
+								print 'if(document.getElementById(val_id).value == "") {';
+									print 'var price = document.getElementsByClassName(val_id)[0];';
+									print 'document.getElementById(val_id).value = price.innerHTML;';
+								print '}';
+								print 'else {';
+									print 'document.getElementById(val_id).value = "";';
+								print '}';
+							print '}';
+							print '</script>';
+
+							print '<td align="right">';
+								print '<div style="visibility:hidden;" id="Valeur" class="'.$namec.'">'.$namep.'</div>';
+								print '<input type="checkbox" style="margin-right:22px;" name="'.$namec.'" class="btn" onclick="return getValeur(this)">';
+							print '</td>';
 							
 	                        print '<td align="center">';
 	                        $namef = 'amount_'.$objp->facid;
 	                        if (!empty($conf->use_javascript_ajax))
 								print img_picto("Auto fill",'rightarrow', "class='AutoFillAmout' data-rowname='".$namef."' data-value='".($objp->total_ttc - $objp->am)."'");
-	                        print '<input type="text" size="8" name="'.$namef.'" value="'.GETPOST($namef).'">';
+	                        print '<input type="text" size="8" id="'.$namec.'" name="'.$namef.'"  value="'.GETPOST($namec).'">';
 							print "</td>";
 							
 							// Multicurrency
